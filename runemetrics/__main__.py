@@ -7,6 +7,7 @@ import sys
 from tabulate import tabulate
 
 
+from .beastiary import Beast
 from .player import Player
 
 
@@ -17,6 +18,10 @@ def main():
             file=sys.stderr,
         )
         sys.exit(1)
+
+    turoth_tup = next(Beast.search('turoth'))
+    turoth = Beast.get(turoth_tup[0])
+    print('{} is weak to {}'.format(turoth.name, turoth.weakness))
 
     player = Player.login_and_fetch(sys.argv[1], sys.argv[2])
 
