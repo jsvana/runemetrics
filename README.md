@@ -1,6 +1,8 @@
 # Runemetrics API
 
-A quick n' dirty wrapper around the Runemetrics API to get detailed player statistics in Runescape.
+A quick n' dirty wrapper around the (unofficial) [Runemetrics](https://apps.runescape.com/runemetrics/app/welcome) API to get detailed player statistics in Runescape.
+
+Requires users to provide username and password to login.
 
 ## Usage
 
