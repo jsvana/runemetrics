@@ -1,6 +1,7 @@
 """
 Example usage of and wrapper around the Runemetrics API
 """
+import math
 import sys
 
 
@@ -19,30 +20,27 @@ def main():
         )
         sys.exit(1)
 
-    turoth_tup = next(Beast.search('turoth'))
-    turoth = Beast.get(turoth_tup[0])
-    print('{} is weak to {}'.format(turoth.name, turoth.weakness))
-
     player = Player.login_and_fetch(sys.argv[1], sys.argv[2])
+    attack = player.levels['Attack']
 
-    print('{} - level {}'.format(player.name, player.combat_level))
+    for beast_id, name in Beast.search('Lesser Demon'):
+        beast = Beast.get(beast_id)
 
-    rows = []
-    for level in player.levels.values():
-        rows.append([
-            level.name,
-            level.level,
-            level.experience_to_next_level,
-        ])
-
-    print(
-        tabulate(
-            rows,
-            headers=['Name', 'Current Level', 'XP to Next Level'],
-            numalign='right',
-            floatfmt='.2f',
+        if beast.experience == 0:
+            continue
+        beasts_left = math.ceil(
+            attack.experience_to_next_level / beast.experience
         )
-    )
+
+        print(
+            '{} {}s left until level {} ({:.2f} xp left, {} per)'.format(
+                beasts_left,
+                name,
+                attack.level + 1,
+                attack.experience_to_next_level,
+                beast.experience
+            )
+        )
 
 
 if __name__ == "__main__":
