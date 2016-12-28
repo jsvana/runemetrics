@@ -2,9 +2,22 @@
 
 A quick n' dirty wrapper around the (unofficial) [Runemetrics](https://apps.runescape.com/runemetrics/app/welcome) API to get detailed player statistics in Runescape.
 
-Requires users to provide username and password to login.
+Requires users to provide username and password if you want to login.
 
 ## Usage
+
+Two ways to use this:
+
+- Unauthenticated:
+```python
+from runemetrics.player import Player
+
+player = Player.fetch('player_name')
+
+print(player.name)
+print(player.levels['Agility'].level)
+print(player.quests_complete)
+```
 
 ```python
 from runemetrics.player import Player
@@ -12,23 +25,16 @@ from runemetrics.player import Player
 player = Player.login_and_fetch('username', 'password')
 
 print(player.name)
-print(player.levels['Agility'].level)
-print(player.quests_complete)
+# Only accessible after login
+print(player.play_time)
 ```
 
 To run the example:
 
 ```
-$ python3 -m runemetrics <username> <password>
-gravsmasher - level 84
-Name             Current Level    XP to Next Level
--------------  ---------------  ------------------
-Constitution                65            25140.70
-Hunter                      31               34.80
-Woodcutting                 79           108886.00
-Smithing                    52            12310.40
-Crafting                    46             5780.30
+$ python3 -m runemetrics get-profile <username> <password>
 ...
+$ python3 -m runemetrics get-player <player_name>
 ```
 
 ## Motivation
