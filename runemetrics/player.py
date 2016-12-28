@@ -4,6 +4,13 @@ Contains abstractions around some of the Runemetrics API
 import requests
 
 
+class AuthenticationError(Exception):
+    """
+    Thrown when a query requires authentication but the user is not logged in
+    """
+    pass
+
+
 class Level(object):
     """
     Represents a level in the Runemetrics API
@@ -175,7 +182,6 @@ class Player(object):
 
         self.combat_level = obj['combatlevel']
         self.name = obj['name']
-        self.playtime = obj['playtimedays'] + obj['playtimehours'] / 24
         self.quests_complete = obj['questscomplete']
         self.quests_started = obj['questsstarted']
         self.quests_not_started = obj['questsnotstarted']
@@ -184,6 +190,27 @@ class Player(object):
         self.total_experience = obj['totalxp'] / 10
         levels = [Level(l) for l in obj['skillvalues']]
         self.levels = {l.name: l for l in levels}
+
+        # This is only accessible after logging in
+        if 'playtimedays' in obj:
+            self.play_time = obj['playtimedays'] + obj['playtimehours'] / 24
+
+    @classmethod
+    def fetch(cls, player_name=None, session=None):
+        if not session:
+            session = requests.Session()
+        params = {}
+        if player_name:
+            params['user'] = player_name
+        data = session.get(
+            cls.PROFILE_URL,
+            params=params,
+        ).json()
+        if data.get('error') == 'PROFILE_PRIVATE':
+            raise AuthenticationError(
+                'Player profile is private. Authenticate and try again.'
+            )
+        return cls(session, data)
 
     @classmethod
     def login_and_fetch(cls, username, password):
@@ -198,7 +225,14 @@ class Player(object):
                 'password': password,
                 'mod': 'www',
                 'ssl': '0',
-                'dest': 'community',
             },
         )
-        return cls(session, session.get(cls.PROFILE_URL).json())
+
+        try:
+            return cls.fetch(session=session)
+        except AuthenticationError:
+            # Since we're authenticated, we know this profile is private and
+            # unviewable
+            raise AuthenticationError(
+                'Unable to view other profile marked private of another player'
+            )
